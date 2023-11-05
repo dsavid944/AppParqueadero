@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Login</title>
+
+<!-- Bootstrap CSS -->
+<link rel="stylesheet" href="/static/css/bootstrap/css/bootstrap.min.css">
+
+<!-- Opcional: Bootstrap Bundle con Popper (para componentes interactivos, si lo necesitas) -->
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.bundle.min.js" integrity="sha384-pjL6Vc/I2STahDk+D/5tv6WqzZr9dLhF0kMcmZW4iqU4jzSKE5xXribnCec7b5e3" crossorigin="anonymous"></script>
+
+<link rel="stylesheet" href="/static/css/style.css">
+
+
+</head>
+<body>
+
+<div class="main-content">
+    <form class="auth-form" method="POST" action="{{ url_for('auth.login') }}">
+        <h2 class="text-center mb-4">Iniciar Sesión</h2>
+        <!-- Mensajes de flash para notificaciones -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="alert alert-{{ category }}">{{ message }}</div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+        <!-- Campos del formulario -->
+        <input type="text" name="username" placeholder="Nombre de usuario" required>
+        <input type="password" name="password" placeholder="Contraseña" required>
+        <button type="submit" class="btn btn-primary btn-block">Ingresar</button>
+        <div class="text-center mt-3">
+            <a href="{{ url_for('auth.register') }}">Registrarse</a>
+        </div>
+    </form>
+</div>
+
+<script src="/static/js/jquery/jquery.min.js"></script>
+<script src="/static/js/bootstrap/bootstrap.bundle.min.js"></script>
+</body>
+</html>
