@@ -4,6 +4,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from flask_login import login_user, logout_user, login_required
 from app import db
 
+
 auth_blueprint = Blueprint('auth', __name__, url_prefix='/auth')
 
 @auth_blueprint.route('/login', methods=['GET', 'POST'])
@@ -29,19 +30,19 @@ def logout():
 @auth_blueprint.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
-        # Obtener datos del formulario
         username = request.form.get('username')
         password = request.form.get('password')
-        role_id = request.form.get('role')
-        role = Rol.query.filter_by(id=role_id).first()
+        role_id = request.form.get('role')  # Aquí obtienes el ID del rol directamente
         
+        # Verificar si el rol existe
+        role = Rol.query.get(role_id)
         if not role:
             flash('Rol seleccionado no es válido', 'error')
             return render_template('auth/register.html', roles=Rol.query.all())
 
         # Crear una instancia del usuario
-        user = Usuario(username=username, password=generate_password_hash(password))
-        user.role_id = role.id  # Asignar el rol al usuario
+        hashed_password = generate_password_hash(password)
+        user = Usuario(username=username, password=hashed_password, rol_id=role.id)
 
         # Agregar el usuario a la base de datos
         db.session.add(user)
@@ -50,10 +51,8 @@ def register():
         flash('Registro exitoso. Ahora puedes iniciar sesión.', 'success')
         return redirect(url_for('auth.login'))
     else:
-        # Si es una solicitud GET, pasamos los roles al template
-        roles = Rol.query.all()  # Obtener todos los roles disponibles
+        roles = Rol.query.all()
+        # Mostrar la página de registro si es una solicitud GET
         return render_template('auth/register.html', roles=roles)
-
-    # Mostrar la página de registro si es una solicitud GET
-    return render_template('auth/register.html')
+    
 

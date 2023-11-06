@@ -9,4 +9,4 @@ class Rol(db.Model):
     name = db.Column(db.Enum('admin', 'user'), default='user')
 
     # La relación debe ser 'back_populates' en lugar de 'backref' si ya tienes una referencia en la clase Usuario
-    usuarios = db.relationship('Usuario', back_populates='rol')
+    usuarios = db.relationship('Usuario', back_populates='rol', lazy='dynamic')
