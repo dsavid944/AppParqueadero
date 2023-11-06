@@ -1,0 +1,38 @@
+<!-- home.html -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Inicio - Sistema de Parqueadero</title>
+        <!-- Bootstrap CSS -->
+<link rel="stylesheet" href="/static/css/bootstrap/css/bootstrap.min.css">
+
+<link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <header>
+        <h1>Bienvenido al Sistema de Gestión de Parqueaderos</h1>
+        <!-- Aquí puedes añadir una barra de navegación o enlaces de login/logout si es necesario -->
+    </header>
+
+    <main>
+        <!-- Contenido principal de la página -->
+        <div>
+            <h2>Navegación</h2>
+            <nav>
+                <ul>
+                    <!-- Se supone que aquí se verificará si el usuario es un administrador o un usuario común para mostrar enlaces adecuados -->
+                    <li><a href="{{ url_for('admin.configuracion') }}">Configuración (Admin)</a></li>
+                    <li><a href="{{ url_for('admin.reportes') }}">Reportes (Admin)</a></li>
+                    <li><a href="{{ url_for('user.gestion') }}">Gestión (Usuario)</a></li>
+
+                </ul>
+            </nav>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2023 Sistema de Gestión de Parqueaderos</p>
+    </footer>
+</body>
+</html>

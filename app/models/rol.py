@@ -6,5 +6,7 @@ from datetime import datetime
 class Rol(db.Model):
     __tablename__ = 'roles'
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(50), unique=True, nullable=False)
-    usuarios = db.relationship('Usuario', backref='rol', lazy='dynamic')
+    name = db.Column(db.Enum('admin', 'user'), default='user')
+
+    # La relación debe ser 'back_populates' en lugar de 'backref' si ya tienes una referencia en la clase Usuario
+    usuarios = db.relationship('Usuario', back_populates='rol')

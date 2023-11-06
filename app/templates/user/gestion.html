@@ -2,21 +2,29 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Gestión de Usuarios</title>
+    <title>Gestión de Vehículos</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
 </head>
 <body>
     <div class="container">
-        <h1>Gestión de Usuarios</h1>
-        <!-- Lista de usuarios o formulario para agregar un nuevo usuario -->
-        <!-- Ejemplo de un formulario simple para agregar un usuario -->
-        <form method="post">
-            <div class="mb-3">
-                <label for="inputUserName" class="form-label">Nombre de Usuario</label>
-                <input type="text" class="form-control" id="inputUserName" placeholder="Nombre de Usuario">
-            </div>
-            <button type="submit" class="btn btn-primary">Agregar Usuario</button>
-        </form>
+        <h1>Gestión de Vehículos</h1>
+        <!-- Secciones para Entradas, Salidas, Pagos y Novedades -->
+        <section>
+            <h2>Entradas</h2>
+            <!-- Formulario y lista de entradas -->
+        </section>
+        <section>
+            <h2>Salidas</h2>
+            <!-- Formulario y lista de salidas -->
+        </section>
+        <section>
+            <h2>Pagos</h2>
+            <!-- Formulario y lista de pagos -->
+        </section>
+        <section>
+            <h2>Novedades</h2>
+            <!-- Formulario y lista de novedades -->
+        </section>
     </div>
     <script src="{{ url_for('static', filename='js/jquery.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>

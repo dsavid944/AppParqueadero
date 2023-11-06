@@ -13,8 +13,9 @@ login_manager = LoginManager()
 # Inicializar Flask Migrate aquí, sin parámetros
 migrate = Migrate()
 
-
 def create_app():
+    # Importar y registrar blueprints
+    from .controllers.main_controller import  main_blueprint, register_blueprints
     app = Flask(__name__)
 
     # Configuración de la clave secreta y la base de datos
@@ -26,16 +27,12 @@ def create_app():
     db.init_app(app)
     login_manager.init_app(app)
     migrate.init_app(app, db)
+    register_blueprints(app)
 
     # Configuración de la sesión de login
     login_manager.login_view = 'auth.login'
 
-    # Importar y registrar blueprints
-    from .controllers import admin_blueprint, user_blueprint, auth_blueprint
-    app.register_blueprint(admin_blueprint)
-    app.register_blueprint(user_blueprint)
-    app.register_blueprint(auth_blueprint)
-    
+   
     # Importar aquí los modelos para evitar importaciones circulares
     from app.models import Usuario, Rol, Celda, Vehiculo, HistorialVehiculo, Tarifa, Transaccion, Novedad, User
     
