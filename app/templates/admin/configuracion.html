@@ -1,24 +1,28 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Configuración del Administrador</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap/bootstrap.min.css') }}">
-</head>
-<body>
-    <div class="container">
-        <h1>Configuración del Administrador</h1>
-        <!-- Formulario de configuración aquí -->
-        <form method="post">
-            <!-- Agregar campos de configuración como sea necesario -->
-            <div class="mb-3">
-                <label for="exampleFormControlInput1" class="form-label">Ejemplo de Configuración</label>
-                <input type="email" class="form-control" id="exampleFormControlInput1" placeholder="Ejemplo">
-            </div>
-            <button type="submit" class="btn btn-primary">Guardar Cambios</button>
-        </form>
-    </div>
-    <script src="{{ url_for('static', filename='js/jquery/jquery.min.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
-</body>
-</html>
+{% extends "base.html" %} {% block content %}
+
+<h2>Configuración de Tarifas</h2>
+<form method="POST" action="{{ url_for('admin.configuracion') }}">
+  {% for tarifa in tarifas %}
+  <div>
+    <label>{{ tarifa.descripcion }} ({{ tarifa.tipo_vehiculo }})</label>
+    <input
+      type="number"
+      step="0.01"
+      name="nuevo_costo"
+      value="{{ tarifa.costo }}"
+      required
+    />
+    <input type="hidden" name="tarifa_id" value="{{ tarifa.id }}" />
+    <button type="submit">Actualizar Precio</button>
+  </div>
+  {% endfor %}
+</form>
+
+<h2>Gestión de Usuarios</h2>
+<!-- Aquí puedes agregar una tabla o formulario para editar usuarios -->
+{% for usuario in usuarios %}
+<!-- Formulario de edición de usuario -->
+
+  <!-- Campos para editar usuario -->
+</form>
+{% endfor %} {% endblock %}
