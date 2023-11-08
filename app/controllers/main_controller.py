@@ -6,7 +6,7 @@ from .user_controller import user_blueprint
 from .auth_controller import auth_blueprint
 
 # Creamos el Blueprint para este controlador principal
-main_blueprint = Blueprint('main', __name__)
+main_blueprint = Blueprint('main', __name__, url_prefix="/main")
 
 # Ruta de inicio que muestra las opciones de navegación disponibles
 @main_blueprint.route('/')

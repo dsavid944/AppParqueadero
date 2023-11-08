@@ -20,7 +20,7 @@
     <!-- Barra de Navegación -->
     <nav class="navbar bg-body-tertiary fixed-top">
       <div class="container-fluid">
-        <a class="navbar-brand" href="#">AutosColombia</a>
+        <a class="navbar-brand" href="{{ url_for('main.home') }}">AutosColombia</a>
         <button
           class="navbar-toggler"
           type="button"
@@ -97,7 +97,7 @@
                 </ul>
               </li>
               <li class="nav-item">
-                <a class="nav-link" href="#">Cerrar</a>
+                <a class="nav-link" href="{{ url_for('auth.logout') }}">Cerrar</a>
               </li>
             </ul>
             <form class="d-flex mt-3" role="search">
