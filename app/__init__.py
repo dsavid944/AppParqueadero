@@ -34,12 +34,12 @@ def create_app():
 
    
     # Importar aquí los modelos para evitar importaciones circulares
-    from app.models import Usuario, Rol, Celda, Vehiculo, HistorialVehiculo, Tarifa, Transaccion, Novedad, User
+    from app.models import Usuario, Rol, Celda, Vehiculo, HistorialVehiculo, Tarifa, Transaccion, Novedad
     
     # Configurar aquí el cargador de usuario para Flask-Login
     @login_manager.user_loader
     def load_user(user_id):
-        return User.query.get(int(user_id))
+        return Usuario.query.get(int(user_id))
 
     return app
 

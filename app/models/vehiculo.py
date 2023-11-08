@@ -11,5 +11,5 @@ class Vehiculo(db.Model):
     marca = db.Column(db.String(50), nullable=False)
     modelo = db.Column(db.String(50))
     color = db.Column(db.String(30))
-    propietario_id = db.Column(db.Integer, db.ForeignKey('usuarios.id'))
+    usuario_id = db.Column(db.Integer, db.ForeignKey('usuarios.id'))
     historial = db.relationship('HistorialVehiculo', backref='vehiculo', lazy='dynamic')

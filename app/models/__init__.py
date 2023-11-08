@@ -6,4 +6,3 @@ from .historial_vehiculo import HistorialVehiculo
 from .tarifa import Tarifa
 from .transaccion import Transaccion
 from .novedad import Novedad
-from .user import User

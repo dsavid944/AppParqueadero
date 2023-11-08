@@ -1,28 +1,43 @@
-{% extends "base.html" %} {% block content %}
+{% extends "base.html" %}
 
-<h2>Configuración de Tarifas</h2>
-<form method="POST" action="{{ url_for('admin.configuracion') }}">
-  {% for tarifa in tarifas %}
-  <div>
-    <label>{{ tarifa.descripcion }} ({{ tarifa.tipo_vehiculo }})</label>
-    <input
-      type="number"
-      step="0.01"
-      name="nuevo_costo"
-      value="{{ tarifa.costo }}"
-      required
-    />
-    <input type="hidden" name="tarifa_id" value="{{ tarifa.id }}" />
-    <button type="submit">Actualizar Precio</button>
-  </div>
+{% block content %}
+<main role="main" class="container mt-4">
+  <h2>Configuración de Tarifas</h2>
+  <form method="POST" action="{{ url_for('admin.configuracion') }}">
+    {% for tarifa in tarifas %}
+    <div>
+      <label>{{ tarifa.descripcion }} ({{ tarifa.tipo_vehiculo }})</label>
+      <input
+        type="number"
+        step="0.01"
+        name="nuevo_costo_{{ tarifa.id }}"
+        value="{{ tarifa.costo }}"
+        required
+      />
+      <input type="hidden" name="tarifa_id" value="{{ tarifa.id }}" />
+      <button type="submit">Actualizar Precio</button>
+    </div>
+    {% endfor %}
+  </form>
+
+  <h2>Gestión de Usuarios</h2>
+  <!-- Implementación de la tabla o formulario para editar usuarios -->
+  {% for usuario in usuarios %}
+  <form method="POST" action="{{ url_for('admin.configuracion', user_id=usuario.id) }}">
+    <div>
+      <label for="username_{{ usuario.id }}">Nombre de Usuario:</label>
+      <input type="text" id="username_{{ usuario.id }}" name="username" value="{{ usuario.username }}" required>
+    </div>
+    <div>
+      <label for="role_{{ usuario.id }}">Rol:</label>
+      <select id="role_{{ usuario.id }}" name="role" required>
+        <option value="admin" {% if usuario.role == 'admin' %}selected{% endif %}>Administrador</option>
+        <option value="user" {% if usuario.role == 'user' %}selected{% endif %}>Usuario</option>
+      </select>
+    </div>
+    <button type="submit">Actualizar Usuario</button>
+  </form>
   {% endfor %}
-</form>
+</main>
+{% endblock %}
 
-<h2>Gestión de Usuarios</h2>
-<!-- Aquí puedes agregar una tabla o formulario para editar usuarios -->
-{% for usuario in usuarios %}
-<!-- Formulario de edición de usuario -->
-
-  <!-- Campos para editar usuario -->
-</form>
-{% endfor %} {% endblock %}
