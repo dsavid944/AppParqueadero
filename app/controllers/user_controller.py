@@ -18,23 +18,22 @@ def gestion():
     historial = HistorialVehiculo.query.all()  # o una versión filtrada para el usuario actual
     transacciones = Transaccion.query.all()  # o filtrar por vehículo/usuario
     novedades = Novedad.query.all()  # o filtrar por usuario
-    tipos_vehiculo = ['carro', 'moto']
 
     return render_template(
         'user/gestion.html',
         vehiculos=vehiculos,
         historial=historial,
         transacciones=transacciones,
-        novedades=novedades,
-        tipos_vehiculo=tipos_vehiculo
+        novedades=novedades
     )
 
-@user_blueprint.route('/entrada', methods=['POST'])
+@user_blueprint.route('/entrada', methods=['GET', 'POST'])
 @login_required
 def registrar_entrada():
     if request.method == 'POST':
         placa = request.form.get('placa')  # Obtener la placa del formulario
         tipo_vehiculo = request.form.get('tipo_vehiculo')  # Obtener el tipo de vehículo del formulario
+        tipos_vehiculo = ['carro', 'moto']
         
         # Verificar si el vehículo ya está registrado
         vehiculo = Vehiculo.query.filter_by(placa=placa).first()
@@ -96,34 +95,38 @@ def registrar_entrada():
         flash('Entrada de vehículo registrada con éxito.')
         return redirect(url_for('user.gestion'))
     
-    # Si el método no es POST
-    return redirect(url_for('user.gestion'))
+    return render_template('user/entrada.html', tipos_vehiculo=tipos_vehiculo)
 
 
-@user_blueprint.route('/salida', methods=['POST'])
+@user_blueprint.route('/salida', methods=['GET', 'POST'])
 @login_required
 def registrar_salida():
     if request.method == 'POST':
-        historial_id = request.form.get('historial_id')  # ID del historial de vehículo
-        
-        # Buscar el registro del historial por ID
-        registro_historial = HistorialVehiculo.query.get(historial_id)
-        if registro_historial and registro_historial.fecha_hora_salida is None:
-            # Registrar la salida del vehículo
-            registro_historial.fecha_hora_salida = datetime.now()
-            
-            # Liberar la celda ocupada por el vehículo
-            celda_ocupada = Celda.query.get(registro_historial.celda_id)
-            celda_ocupada.estado = 'libre'
-            
-            # Guardar los cambios en la base de datos
-            db.session.commit()
-            flash('Salida de vehículo registrada con éxito.')
+        placa = request.form.get('placa')  # Se obtiene la placa del formulario
+
+        # Buscar el vehículo por la placa para obtener su ID
+        vehiculo = Vehiculo.query.filter_by(placa=placa).first()
+        if vehiculo:
+            # Buscar el registro de historial más reciente sin fecha de salida
+            registro_historial = HistorialVehiculo.query.filter_by(vehiculo_id=vehiculo.id, fecha_hora_salida=None).order_by(HistorialVehiculo.fecha_hora_entrada.desc()).first()
+            if registro_historial:
+                # Registrar la salida del vehículo
+                registro_historial.fecha_hora_salida = datetime.now()
+                
+                # Liberar la celda ocupada por el vehículo
+                celda_ocupada = Celda.query.get(registro_historial.celda_id)
+                celda_ocupada.estado = 'libre'
+                
+                # Guardar los cambios en la base de datos
+                db.session.commit()
+                flash('Salida de vehículo registrada con éxito.')
+            else:
+                flash('No se encontró entrada pendiente de salida para la placa proporcionada.')
         else:
-            flash('Registro de salida no válido o ya registrado.')
-        
+            flash('Vehículo no registrado.')
+
         return redirect(url_for('user.gestion'))
-    return redirect(url_for('user.gestion'))
+    return render_template('user/salida.html')
 
 
 @user_blueprint.route('/pago', methods=['POST'])

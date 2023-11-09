@@ -1,0 +1,47 @@
+{% extends "base.html" %} {% block head %} {{ super() }}
+<link
+  rel="stylesheet"
+  href="{{ url_for('static', filename='css/gestion.css') }}"
+/>
+{% endblock %} {% block content %}
+<div class="container mt-5">
+  <h2 class="mb-4">Gestión de Parqueadero</h2>
+
+  <!-- Mensajes flash para notificaciones -->
+  {% with messages = get_flashed_messages() %} {% if messages %}
+  <div class="alert alert-success" role="alert">{{ messages[0] }}</div>
+  {% endif %} {% endwith %}
+
+  <!-- Formulario de salida de vehículo -->
+  <div class="card shadow mb-4">
+    <div class="card-header py-3">
+      <h6 class="m-0 font-weight-bold text-primary">
+        Registrar Salida de Vehículo
+      </h6>
+    </div>
+    <div class="card-body">
+      <form method="post" action="{{ url_for('user.registrar_salida') }}">
+        <div class="form-group">
+          <label for="placa">Placa del Vehículo:</label>
+          <input
+            type="text"
+            class="form-control"
+            id="placa"
+            name="placa"
+            placeholder="Ingrese la placa del vehículo"
+            required
+          />
+        </div>
+        <button type="submit" class="btn btn-primary mt-3">
+          Registrar Salida
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Lista de vehículos actualmente dentro del parqueadero -->
+  <!-- Esto puede ser una tabla o una serie de tarjetas que muestren la información del vehículo y la opción de registrar salida directamente desde allí -->
+</div>
+{% endblock %} {% block scripts %} {{ super() }}
+
+{% endblock %}

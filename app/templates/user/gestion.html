@@ -12,93 +12,13 @@
   <div class="alert alert-success" role="alert">{{ messages[0] }}</div>
   {% endif %} {% endwith %}
 
-  <!-- Formulario de ingreso de vehículo -->
-  <div class="card shadow mb-4">
-    <div class="card-header py-3">
-      <h6 class="m-0 font-weight-bold text-primary">
-        Registrar Ingreso de Vehículo
-      </h6>
-    </div>
-    <div class="card-body">
-      <form method="post" action="{{ url_for('user.registrar_entrada') }}">
-        <div class="form-group">
-          <label for="placa">Placa del Vehículo:</label>
-          <input
-            type="text"
-            class="form-control"
-            id="placa"
-            name="placa"
-            required
-          />
-        </div>
-        <div class="form-group">
-          <label for="tipo_vehiculo">Tipo de Vehículo:</label>
-          <select
-            class="form-select"
-            id="tipo_vehiculo"
-            name="tipo_vehiculo"
-            required
-          >
-            <option selected>Seleccione...</option>
-            {% for tipo in tipos_vehiculo %}
-            <option value="{{ tipo }}">{{ tipo | capitalize }}</option>
-            {% endfor %}
-          </select>
-        </div>
-        <div class="form-group">
-          <label for="marca">Marca del Vehículo:</label>
-          <input
-            type="text"
-            class="form-control"
-            id="marca"
-            name="marca"
-            required
-          />
-        </div>
-        <div class="form-group">
-          <label for="modelo">Modelo del Vehículo:</label>
-          <input type="text" class="form-control" id="modelo" name="modelo" />
-        </div>
-        <div class="form-group">
-          <label for="color">Color del Vehículo:</label>
-          <input type="text" class="form-control" id="color" name="color" />
-        </div>
-        <button type="submit" class="btn btn-primary mt-3">
-          Registrar Ingreso
-        </button>
-      </form>
-    </div>
-  </div>
+ 
 
-  <!-- Formulario de salida de vehículo -->
-  <div class="card shadow mb-4">
-    <div class="card-header py-3">
-      <h6 class="m-0 font-weight-bold text-primary">
-        Registrar Salida de Vehículo
-      </h6>
-    </div>
-    <div class="card-body">
-      <form method="post" action="{{ url_for('user.registrar_salida') }}">
-        <div class="form-group">
-          <label for="historial_id">ID del Historial del Vehículo:</label>
-          <input
-            type="number"
-            class="form-control"
-            id="historial_id"
-            name="historial_id"
-            required
-          />
-        </div>
-        <button type="submit" class="btn btn-primary mt-3">
-          Registrar Salida
-        </button>
-      </form>
-    </div>
-  </div>
+  
 
   <!-- Lista de vehículos actualmente dentro del parqueadero -->
   <!-- Esto puede ser una tabla o una serie de tarjetas que muestren la información del vehículo y la opción de registrar salida directamente desde allí -->
 </div>
 {% endblock %} {% block scripts %} {{ super() }}
-<!-- Aquí puedes agregar scripts específicos para gestion.html si es necesario -->
+
 {% endblock %}
