@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block head %}
+  {{ super() }}
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/gestion.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+  <h2 class="mb-4">Reportar Novedad</h2>
+
+  <!-- Mensajes flash para notificaciones -->
+  {% with messages = get_flashed_messages() %}
+    {% if messages %}
+      <div class="alert alert-success" role="alert">
+        {{ messages[0] }}
+      </div>
+    {% endif %}
+  {% endwith %}
+
+  <!-- Formulario para reportar novedad -->
+  <div class="card">
+    <div class="card-body">
+      <form method="post" action="{{ url_for('user.reportar_novedad') }}">
+        <div class="mb-3">
+          <label for="placa" class="form-label">Placa del Vehículo:</label>
+          <input type="text" class="form-control" id="placa" name="placa" placeholder="Ingrese la placa del vehículo" required>
+        </div>
+        <div class="mb-3">
+          <label for="descripcion" class="form-label">Descripción de la Novedad:</label>
+          <textarea class="form-control" id="descripcion" name="descripcion" rows="3" required></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Reportar Novedad</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+

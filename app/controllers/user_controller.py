@@ -240,19 +240,25 @@ def registrar_pago():
 
 
 
-@user_blueprint.route("/novedad", methods=["POST"])
+@user_blueprint.route("/novedad", methods=["GET", "POST"])
 @login_required
 def reportar_novedad():
     if request.method == "POST":
+        placa = request.form.get("placa")
         descripcion = request.form.get("descripcion")
-        vehiculo_id = request.form.get("vehiculo_id")
+
+        # Buscar el vehículo por placa para obtener su id
+        vehiculo = Vehiculo.query.filter_by(placa=placa).first()
+        if not vehiculo:
+            flash("No se encontró un vehículo con la placa proporcionada.")
+            return redirect(url_for("user.novedad"))
 
         # Crear la novedad
         nueva_novedad = Novedad(
             descripcion=descripcion,
-            vehiculo_id=vehiculo_id,
-            fecha_hora_reporte=datetime.now(),
-            usuario_id=current_user.id,  # Asociar la novedad al usuario actual
+            vehiculo_id=vehiculo.id,
+            fecha_hora=datetime.now(),
+            reportado_por=current_user.id,  # Usar el nombre de campo correcto aquí
         )
 
         # Añadir la novedad y guardar los cambios en la base de datos
@@ -261,4 +267,6 @@ def reportar_novedad():
 
         flash("Novedad reportada con éxito.")
         return redirect(url_for("user.gestion"))
-    return redirect(url_for("user.gestion"))
+    
+    return render_template("user/novedad.html")
+
