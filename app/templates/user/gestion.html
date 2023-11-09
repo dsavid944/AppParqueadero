@@ -1,24 +1,42 @@
-{% extends "base.html" %} {% block head %} {{ super() }}
-<link
-  rel="stylesheet"
-  href="{{ url_for('static', filename='css/gestion.css') }}"
-/>
-{% endblock %} {% block content %}
+{% extends "base.html" %} {% block content %}
 <div class="container mt-5">
-  <h2 class="mb-4">Gestión de Parqueadero</h2>
+  <h2 class="mb-4">Vehículos Actualmente Estacionados</h2>
 
   <!-- Mensajes flash para notificaciones -->
   {% with messages = get_flashed_messages() %} {% if messages %}
   <div class="alert alert-success" role="alert">{{ messages[0] }}</div>
   {% endif %} {% endwith %}
 
- 
-
-  
-
-  <!-- Lista de vehículos actualmente dentro del parqueadero -->
-  <!-- Esto puede ser una tabla o una serie de tarjetas que muestren la información del vehículo y la opción de registrar salida directamente desde allí -->
+  <table class="table">
+    <thead>
+      <tr>
+        <th scope="col">Placa</th>
+        <th scope="col">Tipo</th>
+        <th scope="col">Hora de Entrada</th>
+        <th scope="col">Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for vehiculo in historial_actual %}
+      <tr>
+        <td>{{ vehiculo.placa }}</td>
+        <td>{{ vehiculo.tipo }}</td>
+        <td>{{ vehiculo.fecha_hora_entrada }}</td>
+        <td>
+          <form method="post" action="{{ url_for('user.registrar_salida') }}">
+            <input
+              type="hidden"
+              name="placa"
+              value="{{ vehiculo.placa }}"
+            />
+            <button type="submit" class="btn btn-danger btn-sm">
+              Registrar Salida
+            </button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
 </div>
-{% endblock %} {% block scripts %} {{ super() }}
-
 {% endblock %}

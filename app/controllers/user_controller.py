@@ -16,30 +16,27 @@ from decimal import Decimal
 user_blueprint = Blueprint("user", __name__, url_prefix="/user")
 
 
-@user_blueprint.route("/gestion", methods=["GET", "POST"])
+@user_blueprint.route("/gestion", methods=["GET"])
 @login_required
 def gestion():
-    if request.method == "POST":
-        # Aquí debería ir la lógica para manejar POST requests, como registrar entradas o salidas, hacer pagos, etc.
-        pass
-
-    # Lógica para recuperar datos necesarios para la gestión de vehículos
-    vehiculos = (
-        Vehiculo.query.all()
-    )  # o filtrar según el usuario actual con current_user.vehiculos
-    historial = (
-        HistorialVehiculo.query.all()
-    )  # o una versión filtrada para el usuario actual
-    transacciones = Transaccion.query.all()  # o filtrar por vehículo/usuario
-    novedades = Novedad.query.all()  # o filtrar por usuario
+    # Obtener vehículos actualmente estacionados (aquellos sin fecha_hora_salida)
+    historial_actual = (
+        HistorialVehiculo.query.filter(HistorialVehiculo.fecha_hora_salida.is_(None))
+        .join(Vehiculo)
+        .add_columns(
+            Vehiculo.placa,
+            Vehiculo.tipo,
+            HistorialVehiculo.fecha_hora_entrada,
+            HistorialVehiculo.id.label("historial_id")
+        )
+        .all()
+    )
 
     return render_template(
         "user/gestion.html",
-        vehiculos=vehiculos,
-        historial=historial,
-        transacciones=transacciones,
-        novedades=novedades,
+        historial_actual=historial_actual,
     )
+
 
 
 @user_blueprint.route("/entrada", methods=["GET", "POST"])
