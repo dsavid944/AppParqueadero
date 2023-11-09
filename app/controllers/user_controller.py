@@ -18,16 +18,16 @@ def gestion():
     historial = HistorialVehiculo.query.all()  # o una versión filtrada para el usuario actual
     transacciones = Transaccion.query.all()  # o filtrar por vehículo/usuario
     novedades = Novedad.query.all()  # o filtrar por usuario
+    tipos_vehiculo = ['carro', 'moto']
 
     return render_template(
         'user/gestion.html',
         vehiculos=vehiculos,
         historial=historial,
         transacciones=transacciones,
-        novedades=novedades
+        novedades=novedades,
+        tipos_vehiculo=tipos_vehiculo
     )
-
-# Rutas adicionales para manejar entradas, salidas, pagos y novedades específicamente
 
 @user_blueprint.route('/entrada', methods=['POST'])
 @login_required
@@ -40,9 +40,29 @@ def registrar_entrada():
         vehiculo = Vehiculo.query.filter_by(placa=placa).first()
 
         # Si el vehículo no está registrado, crear una nueva instancia y registrarla
+        if request.method == 'POST':
+        # Recoger todos los datos del formulario
+            placa = request.form.get('placa')
+            tipo_vehiculo = request.form.get('tipo_vehiculo')
+            marca = request.form.get('marca')
+            modelo = request.form.get('modelo')  
+            color = request.form.get('color')
+            usuario_id = current_user.id
+        
+        # Verificar si el vehículo ya está registrado
+        vehiculo = Vehiculo.query.filter_by(placa=placa).first()
+
+        # Si el vehículo no está registrado, crear una nueva instancia y registrarla
         if vehiculo is None:
-            # Crear el nuevo vehículo
-            nuevo_vehiculo = Vehiculo(placa=placa, tipo_vehiculo=tipo_vehiculo)
+            # Crear el nuevo vehículo con todos los datos
+            nuevo_vehiculo = Vehiculo(
+                placa=placa,
+                tipo=tipo_vehiculo,
+                marca=marca,
+                modelo=modelo,
+                color=color,
+                usuario_id=usuario_id  # Asegúrate de que este campo se esté recogiendo o gestionando adecuadamente
+            )
             
             # Añadir el nuevo vehículo a la sesión y hacer commit para generar su ID
             db.session.add(nuevo_vehiculo)
@@ -52,11 +72,14 @@ def registrar_entrada():
             vehiculo = nuevo_vehiculo
             flash('Vehículo registrado con éxito.')
 
-        # Buscar una celda libre para el tipo de vehículo
+         # Buscar una celda libre para el tipo de vehículo
         celda_libre = Celda.query.filter_by(estado='libre', tipo_vehiculo=tipo_vehiculo).first()
         if celda_libre is None:
             flash('No hay celdas libres para el tipo de vehículo.')
             return redirect(url_for('user.gestion'))
+        else:
+            # Si encontramos celda libre, procedemos
+            flash('Celda libre encontrada: ' + str(celda_libre.id))  # Para depuración
 
         # Registrar la entrada del vehículo
         nueva_entrada = HistorialVehiculo(
@@ -64,16 +87,16 @@ def registrar_entrada():
             fecha_hora_entrada=datetime.now(),
             celda_id=celda_libre.id
         )
-        
+        db.session.add(nueva_entrada)
+
         # Actualizar el estado de la celda a 'ocupada'
         celda_libre.estado = 'ocupada'
-        
-        # Añadir la nueva entrada al historial y guardar los cambios en la base de datos
-        db.session.add(nueva_entrada)
-        db.session.commit()
+        db.session.commit()  # Confirmar cambios
 
         flash('Entrada de vehículo registrada con éxito.')
         return redirect(url_for('user.gestion'))
+    
+    # Si el método no es POST
     return redirect(url_for('user.gestion'))
 
 
