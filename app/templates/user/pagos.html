@@ -1,0 +1,47 @@
+{% extends "base.html" %} {% block head %} {{ super() }}
+<link
+  rel="stylesheet"
+  href="{{ url_for('static', filename='css/gestion.css') }}"
+/>
+{% endblock %} {% block content %}
+<div class="container mt-5">
+  <h2 class="mb-4">Gestión de Parqueadero</h2>
+
+  <!-- Mensajes flash para notificaciones -->
+  {% with messages = get_flashed_messages() %} {% if messages %}
+  <div class="alert alert-success" role="alert">{{ messages[0] }}</div>
+  {% endif %} {% endwith %}
+
+  <!-- Formulario de salida de vehículo -->
+  <div class="py-5">
+    <h2>Registro de Pago</h2>
+    <form action="{{ url_for('user.registrar_pago') }}" method="post">
+      <div class="mb-3">
+        <label for="placaVehiculo" class="form-label">Placa del Vehículo</label>
+        <input
+          type="text"
+          class="form-control"
+          id="placaVehiculo"
+          name="placa_vehiculo"
+          placeholder="Ingrese la placa del vehículo"
+          required
+        />
+      </div>
+      <div class="mb-3">
+        <label for="metodoPago" class="form-label">Método de Pago</label>
+        <select class="form-select" id="metodoPago" name="metodo_pago" required>
+            <option value="" selected disabled>Seleccione un método de pago</option>
+            <option value="efectivo">Efectivo</option>
+            <option value="tarjeta">Tarjeta</option>
+            <option value="transferencia">Transferencia</option>
+          </select>
+      </div>
+      
+      <button type="submit" class="btn btn-primary">Registrar Pago</button>
+    </form>
+  </div>
+
+  <!-- Lista de vehículos actualmente dentro del parqueadero -->
+  <!-- Esto puede ser una tabla o una serie de tarjetas que muestren la información del vehículo y la opción de registrar salida directamente desde allí -->
+</div>
+{% endblock %} {% block scripts %} {{ super() }} {% endblock %}
