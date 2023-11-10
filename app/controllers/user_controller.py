@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash
+from flask import Blueprint, render_template, request, redirect, url_for, flash, session
 from ..models import (
     Usuario,
     Vehiculo,
@@ -114,34 +114,37 @@ def registrar_salida():
 
         # Buscar el vehículo por la placa para obtener su ID
         vehiculo = Vehiculo.query.filter_by(placa=placa).first()
-        if vehiculo:
-            # Buscar el registro de historial más reciente sin fecha de salida
-            registro_historial = (
-                HistorialVehiculo.query.filter_by(
-                    vehiculo_id=vehiculo.id, fecha_hora_salida=None
-                )
-                .order_by(HistorialVehiculo.fecha_hora_entrada.desc())
-                .first()
-            )
-            if registro_historial:
-                # Registrar la salida del vehículo
-                registro_historial.fecha_hora_salida = datetime.now()
-
-                # Liberar la celda ocupada por el vehículo
-                celda_ocupada = Celda.query.get(registro_historial.celda_id)
-                celda_ocupada.estado = "libre"
-
-                # Guardar los cambios en la base de datos
-                db.session.commit()
-                flash("Salida de vehículo registrada con éxito.")
-            else:
-                flash(
-                    "No se encontró entrada pendiente de salida para la placa proporcionada."
-                )
-        else:
+        if not vehiculo:
             flash("Vehículo no registrado.")
+            return redirect(url_for("user.gestion"))
+        
+        # Buscar el registro de historial más reciente sin fecha de salida
+        registro_historial = (
+            HistorialVehiculo.query.filter_by(
+                vehiculo_id=vehiculo.id, fecha_hora_salida=None
+            )
+            .order_by(HistorialVehiculo.fecha_hora_entrada.desc())
+            .first()
+        )
 
-        return redirect(url_for("user.gestion"))
+        if registro_historial:
+            # Calcula la tarifa provisionalmente (no asignes la salida aún)
+            tarifa_id, monto = calcular_tarifa(registro_historial)
+            
+            # Guarda la información del pago en la sesión para usar en la siguiente página
+            session['pago_info'] = {
+                'historial_id': registro_historial.id,
+                'monto': str(monto),  # Convertir Decimal a string para guardar en la sesión
+                'tarifa_id': tarifa_id,
+                'vehiculo_id': vehiculo.id,  # Guarda el ID del vehículo para liberar la celda luego
+            }
+
+            flash("Salida de vehículo preparada. Proceda con el pago.")
+            return redirect(url_for("user.registrar_pago"))
+        else:
+            flash("No se encontró entrada pendiente de salida para la placa proporcionada.")
+            return redirect(url_for("user.gestion"))
+
     return render_template("user/salida.html")
 
 
@@ -171,15 +174,12 @@ def obtener_tarifa(duracion_estancia, tipo_vehiculo):
 
 # Esta función calcula la tarifa basada en la duración de la estancia del vehículo
 def calcular_tarifa(historial_vehiculo):
-    # Suponiendo que la fecha_hora_salida ya ha sido asignada en el historial del vehículo
-    duracion_estancia = historial_vehiculo.fecha_hora_salida - historial_vehiculo.fecha_hora_entrada
+    # Usa la hora actual como hora de salida provisional para el cálculo de la tarifa
+    fecha_hora_salida_provisional = datetime.now()
+    duracion_estancia = fecha_hora_salida_provisional - historial_vehiculo.fecha_hora_entrada
     
-    # Necesitas acceder al tipo de vehículo a través del objeto vehículo asociado
-    tipo_vehiculo = historial_vehiculo.vehiculo.tipo  # Accede al tipo desde el objeto vehiculo relacionado
-
-    tarifa_id, monto = obtener_tarifa(
-        duracion_estancia, tipo_vehiculo
-    )
+    tipo_vehiculo = historial_vehiculo.vehiculo.tipo
+    tarifa_id, monto = obtener_tarifa(duracion_estancia, tipo_vehiculo)
     return tarifa_id, monto
 
 
@@ -187,53 +187,52 @@ def calcular_tarifa(historial_vehiculo):
 @user_blueprint.route("/pago", methods=["GET", "POST"])
 @login_required
 def registrar_pago():
+    if 'pago_info' not in session:
+        flash("Información de pago no encontrada.")
+        return redirect(url_for("user.gestion"))
+
+    pago_info = session.get('pago_info')
+    
     if request.method == "POST":
-        placa = request.form.get("placa_vehiculo")
         metodo_pago = request.form.get("metodo_pago")
 
-        # Primero, encuentra el vehículo por placa
-        vehiculo = Vehiculo.query.filter_by(placa=placa).first()
-        if not vehiculo:
-            flash("No se encontró el vehículo con la placa proporcionada.")
+        historial_vehiculo = HistorialVehiculo.query.get(pago_info['historial_id'])
+        if not historial_vehiculo:
+            flash("No se encontró el historial del vehículo.")
             return redirect(url_for("user.gestion"))
         
-        # Encuentra el último historial del vehículo que no tiene hora de salida
-        historial_vehiculo = (
-            HistorialVehiculo.query.filter_by(vehiculo_id=vehiculo.id, fecha_hora_salida=None)
-            .order_by(HistorialVehiculo.fecha_hora_entrada.desc())
-            .first()
-        )
-        if not historial_vehiculo:
-            flash("No se encontró un historial activo para la placa proporcionada.")
-            return redirect(url_for("user.gestion"))
-
-        # Asignamos la fecha de salida antes de calcular la tarifa
+        # Finaliza la salida asignando la fecha de salida ahora
         historial_vehiculo.fecha_hora_salida = datetime.now()
-
-        # Calcula la tarifa en base a la estancia y recupera el tarifa_id correspondiente
-        tarifa_id, monto = calcular_tarifa(historial_vehiculo)
-        if tarifa_id is None or monto is None:
-            flash("No se pudo calcular la tarifa para el vehículo.")
-            return redirect(url_for("user.gestion"))
 
         # Crear la transacción con la tarifa correspondiente
         nueva_transaccion = Transaccion(
             historial_vehiculo_id=historial_vehiculo.id,
-            tarifa_id=tarifa_id,
+            tarifa_id=pago_info['tarifa_id'],
             fecha_hora_pago=datetime.now(),
-            monto=monto,
+            monto=Decimal(pago_info['monto']),
             metodo_pago=metodo_pago,
         )
 
         # Añadir la nueva transacción y guardar los cambios en la base de datos
         db.session.add(nueva_transaccion)
+
+        # Liberar la celda ocupada por el vehículo
+        celda_ocupada = Celda.query.get(historial_vehiculo.celda_id)
+        celda_ocupada.estado = "libre"
+
         db.session.commit()
+
+        # Limpia la información de pago de la sesión
+        session.pop('pago_info', None)
 
         flash("Pago registrado con éxito.")
         return redirect(url_for("user.gestion"))
 
-    # Si el método no es POST, renderiza el template de pagos
-    return render_template("user/pagos.html")
+    # Mostrar el formulario de pago con la información de la sesión
+    return render_template("user/pagos.html", 
+                           monto=pago_info['monto'], 
+                           metodo_pago=["efectivo", "transferencia", "tarjeta"], 
+                           historial_id=pago_info['historial_id'])
 
 
 
