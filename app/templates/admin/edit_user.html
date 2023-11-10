@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <h2>Editar Usuario</h2>
+    <form method="post">
+        <input type="email" name="email" placeholder="Email" value="{{ user.email }}" required>
+        <input type="text" name="username" placeholder="Nombre de usuario" value="{{ user.username }}" required>
+        <select name="rol_id">
+            <!-- Opciones de roles -->
+            <option value="1" {% if user.rol_id == 1 %} selected {% endif %}>Admin</option>
+            <option value="2" {% if user.rol_id == 2 %} selected {% endif %}>Usuario</option>
+        </select>
+        <button type="submit">Actualizar Usuario</button>
+    </form>
+</div>
+{% endblock %}

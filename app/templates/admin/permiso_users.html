@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <h2>Gestionar Usuarios</h2>
+    <table>
+        <tr>
+            <th>Email</th>
+            <th>Nombre de Usuario</th>
+            <th>Rol</th>
+            <th>Acciones</th>
+        </tr>
+        {% for user in users %}
+        <tr>
+            <td>{{ user.email }}</td>
+            <td>{{ user.username }}</td>
+            <td>{{ user.rol_id }}</td>
+            <td>
+                <a href="{{ url_for('admin.edit_user', user_id=user.id) }}">Editar</a>
+                <a href="{{ url_for('admin.change_password', user_id=user.id) }}">Cambiar Contraseña</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+{% endblock %}

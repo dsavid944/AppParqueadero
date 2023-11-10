@@ -93,9 +93,16 @@
                   Configuración
                 </a>
                 <ul class="dropdown-menu">
-                  <li><a class="dropdown-item" href="#">Usuarios</a></li>
-                  <li><a class="dropdown-item" href="#">Tarifas</a></li>
-                </ul>
+                  <li><a class="dropdown-item" href="{{ url_for('admin.tarifa') }}">Tarifas</a></li>
+                  <li>
+                    <hr class="dropdown-divider" />
+                  </li>
+                  <li>
+                    <a class="dropdown-item" href="{{ url_for('admin.editar_user') }}">Editar Usuario</a>
+                    <a class="dropdown-item" href="{{ url_for('admin.cambiar_password') }}">Cambiar Contraseña</a>
+                    <a class="dropdown-item" href="{{ url_for('admin.permiso_users') }}">Editar Permisos</a>
+                  </li>
+                </ul>              
               </li>
               <li class="nav-item">
                 <a class="nav-link" href="{{ url_for('auth.logout') }}">Cerrar</a>
