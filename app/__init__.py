@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate  # Importa la extensión Flask-Migrate
 from flask_login import LoginManager, UserMixin
@@ -14,8 +14,7 @@ login_manager = LoginManager()
 migrate = Migrate()
 
 def create_app():
-    # Importar y registrar blueprints
-    from .controllers.main_controller import  main_blueprint, register_blueprints
+    
     app = Flask(__name__)
 
     # Configuración de la clave secreta y la base de datos
@@ -27,12 +26,18 @@ def create_app():
     db.init_app(app)
     login_manager.init_app(app)
     migrate.init_app(app, db)
+    
+    # Registra los blueprints usando la función register_blueprints
+    from .controllers.main_controller import register_blueprints
     register_blueprints(app)
-
+    
     # Configuración de la sesión de login
     login_manager.login_view = 'auth.login'
-
-   
+    
+    @app.route('/')
+    def index():
+        return redirect(url_for('auth.login'))
+  
     # Importar aquí los modelos para evitar importaciones circulares
     from app.models import Usuario, Rol, Celda, Vehiculo, HistorialVehiculo, Tarifa, Transaccion, Novedad
     
@@ -42,6 +47,7 @@ def create_app():
         return Usuario.query.get(int(user_id))
 
     return app
+
 
     # Crear tablas de base de datos si no existen
     with app.app_context():

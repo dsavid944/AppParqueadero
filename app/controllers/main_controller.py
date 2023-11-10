@@ -10,7 +10,7 @@ main_blueprint = Blueprint('main', __name__, url_prefix="/main")
 
 # Ruta de inicio que muestra las opciones de navegación disponibles
 @main_blueprint.route('/')
-@main_blueprint.route('/home') 
+@main_blueprint.route('/home')
 def home():
     return render_template('main.html')
 

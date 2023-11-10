@@ -2,35 +2,17 @@
 
 {% block content %}
 <main role="main" class="container mt-4">
-<head>
-    <meta charset="UTF-8">
-    <title>Inicio - Sistema de Parqueadero</title>
-        <!-- Bootstrap CSS -->
-<link rel="stylesheet" href="/static/css/bootstrap/bootstrap.min.css">
+    <h1>Bienvenido al Sistema de Gestión de Parqueaderos</h1>
 
-<link rel="stylesheet" href="/static/css/style.css">
-</head>
-<body>
-    <header>
-        <h1>Bienvenido al Sistema de Gestión de Parqueaderos</h1>
-        <!-- Aquí puedes añadir una barra de navegación o enlaces de login/logout si es necesario -->
-    </header>
-
-    <main>
-        <!-- Contenido principal de la página -->
-        <div>
-            <h2>Navegación</h2>
-            <nav>
-                <ul>
-                    <!-- Se supone que aquí se verificará si el usuario es un administrador o un usuario común para mostrar enlaces adecuados -->
-                    <li><a href="{{ url_for('admin.reportes') }}">Reportes (Admin)</a></li>
-                    <li><a href="{{ url_for('user.gestion') }}">Gestión (Usuario)</a></li>
-
-                </ul>
-            </nav>
-        </div>
-    </main>
-</body>
-</html>
+    <div>
+        <h2>Navegación</h2>
+        <nav>
+            <ul>
+                <!-- Asegúrate de que estos endpoints estén definidos en tus rutas de Flask -->
+                <li><a href="{{ url_for('admin.reportes') }}">Reportes (Admin)</a></li>
+                <li><a href="{{ url_for('user.gestion') }}">Gestión (Usuario)</a></li>
+            </ul>
+        </nav>
+    </div>
 </main>
 {% endblock %}
