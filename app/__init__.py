@@ -19,7 +19,7 @@ def create_app():
 
     # Configuración de la clave secreta y la base de datos
     app.config['SECRET_KEY'] = 'tu_clave_secreta_super_secreta'
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:@127.0.0.1:3307/parqueadero_db'
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:@127.0.0.1:3306/parqueadero_db'
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
     # Vincular las instancias de las extensiones con la aplicación creada

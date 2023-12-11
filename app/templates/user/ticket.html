@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5 mb-5">
+    <div class="card">
+        <div class="card-header">
+            Ticket de Pago
+        </div>
+        <div class="card-body">
+            <h5 class="card-title">Detalles del Pago</h5>
+            <p class="card-text">
+                <strong>Número de factura:</strong>  {{ transaccion.id }} <br>
+                <strong>Fecha:</strong> {{ fecha.strftime('%Y-%m-%d %H:%M:%S') }} <br>
+                <strong>Nombre del estacionamiento:</strong>  Autos Colombia <br>
+                <strong>Dirección del estacionamiento:</strong> Calle 34 # 64-45  <br>
+                <strong>Teléfono del estacionamiento:</strong> 300.880.3531  <br>
+                <hr>
+                <strong>Factura:</strong> {{ transaccion.id }} <br>
+                <strong>Fecha y Hora del Pago:</strong> {{ transaccion.fecha_hora_pago }} <br>
+                <strong>Método de Pago:</strong> {{ transaccion.metodo_pago }} <br>
+                <strong>Monto Pagado:</strong> {{ transaccion.monto }} <br>
+                <hr>
+                <strong>Placa del Vehículo:</strong> {{ vehiculo.placa }} <br>
+                <strong>Fecha y Hora de Entrada:</strong> {{ historial_vehiculo.fecha_hora_entrada }} <br>
+                <strong>Fecha y Hora de Salida:</strong> {{ historial_vehiculo.fecha_hora_salida }} <br>
+                <strong>Tiempo Total:</strong> {{ tiempo_total }} <br>
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}

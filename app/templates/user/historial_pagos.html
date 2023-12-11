@@ -1,0 +1,29 @@
+<!-- historial_pagos.html -->
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5 mb-5">
+    <form method="post" action="{{ url_for('user.historial_pagos') }}">
+    <h2>Historial de Pagos</h2>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Fecha</th>
+                <th>Monto</th>
+                <th>Método</th>
+                <th>Recibo</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for pago in pagos %}
+            <tr>
+                <td>{{ pago.fecha }}</td>
+                <td>{{ pago.monto }}</td>
+                <td>{{ pago.metodo }}</td>
+                <td><a href="{{ pago.recibo_url }}">Descargar</a></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

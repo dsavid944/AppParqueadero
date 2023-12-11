@@ -6,12 +6,16 @@ from ..models import (
     Transaccion,
     Novedad,
     Celda,
-    Tarifa,
+    Tarifa
 )
 from .. import db
 from flask_login import login_required, current_user
 from datetime import datetime
 from decimal import Decimal
+from flask import send_file, abort
+import os
+from io import BytesIO
+from reportlab.pdfgen import canvas
 
 user_blueprint = Blueprint("user", __name__, url_prefix="/user")
 
@@ -191,18 +195,19 @@ def registrar_pago():
         flash("Información de pago no encontrada.")
         return redirect(url_for("user.gestion"))
 
-    pago_info = session.get('pago_info')
+    pago_info = session['pago_info']
     
     if request.method == "POST":
         metodo_pago = request.form.get("metodo_pago")
 
         historial_vehiculo = HistorialVehiculo.query.get(pago_info['historial_id'])
-        if not historial_vehiculo:
-            flash("No se encontró el historial del vehículo.")
+        if not historial_vehiculo or historial_vehiculo.fecha_hora_salida is not None:
+            flash("No se encontró el historial del vehículo o ya se registró la salida.")
             return redirect(url_for("user.gestion"))
         
-        # Finaliza la salida asignando la fecha de salida ahora
-        historial_vehiculo.fecha_hora_salida = datetime.now()
+        # Si aún no se ha registrado la salida, hazlo ahora
+        if historial_vehiculo.fecha_hora_salida is None:
+            historial_vehiculo.fecha_hora_salida = datetime.now()
 
         # Crear la transacción con la tarifa correspondiente
         nueva_transaccion = Transaccion(
@@ -215,20 +220,21 @@ def registrar_pago():
 
         # Añadir la nueva transacción y guardar los cambios en la base de datos
         db.session.add(nueva_transaccion)
+        db.session.commit()
 
         # Liberar la celda ocupada por el vehículo
         celda_ocupada = Celda.query.get(historial_vehiculo.celda_id)
         celda_ocupada.estado = "libre"
 
-        db.session.commit()
-
         # Limpia la información de pago de la sesión
         session.pop('pago_info', None)
 
         flash("Pago registrado con éxito.")
-        return redirect(url_for("user.gestion"))
 
-    # Mostrar el formulario de pago con la información de la sesión
+        # Redirige al ticket después de registrar el pago con éxito
+        return redirect(url_for('user.generar_ticket', transaccion_id=nueva_transaccion.id))
+
+    # Mostrar el formulario de pago con la información de la sesión si aún no se ha realizado el POST
     return render_template("user/pagos.html", 
                            monto=pago_info['monto'], 
                            metodo_pago=["efectivo", "transferencia", "tarjeta"], 
@@ -266,3 +272,75 @@ def reportar_novedad():
     
     return render_template("user/novedad.html")
 
+
+@user_blueprint.route("/ticket/<int:transaccion_id>")
+@login_required
+def generar_ticket(transaccion_id):
+    # Recupera los datos necesarios para el ticket usando transaccion_id
+    transaccion = Transaccion.query.get_or_404(transaccion_id)
+    historial_vehiculo = HistorialVehiculo.query.get_or_404(transaccion.historial_vehiculo_id)
+    vehiculo = Vehiculo.query.get_or_404(historial_vehiculo.vehiculo_id)
+    tiempo_total = str((historial_vehiculo.fecha_hora_salida - historial_vehiculo.fecha_hora_entrada).total_seconds() // 3600) + ' horas'
+    # Obtener la fecha y hora actuales
+    fecha_actual = datetime.now()
+    # Renderiza la plantilla con los datos del ticket
+    return render_template('user/ticket.html', transaccion=transaccion, historial_vehiculo=historial_vehiculo, vehiculo=vehiculo, tiempo_total=tiempo_total, fecha=fecha_actual)
+
+@user_blueprint.route('/historial_pagos')
+@login_required
+def historial_pagos():
+    # Primero, obtenemos todos los vehículos del usuario actual
+    vehiculos_usuario = Vehiculo.query.filter_by(usuario_id=current_user.id).all()
+    ids_vehiculos = [vehiculo.id for vehiculo in vehiculos_usuario]
+    
+    # Luego, obtenemos todos los historiales que correspondan a esos vehículos
+    historial_vehiculos = HistorialVehiculo.query.filter(HistorialVehiculo.vehiculo_id.in_(ids_vehiculos)).all()
+    ids_historial = [hv.id for hv in historial_vehiculos]
+    
+    # Finalmente, obtenemos todas las transacciones asociadas a esos historiales
+    pagos = Transaccion.query.filter(Transaccion.historial_vehiculo_id.in_(ids_historial)).order_by(Transaccion.fecha_hora_pago.desc()).all()
+    
+    # Estructurando la información para la plantilla
+    pagos_historial = [{
+        'fecha': pago.fecha_hora_pago.strftime('%d/%m/%Y'),
+        'monto': str(pago.monto),
+        'metodo': pago.metodo_pago,
+        'recibo_url': url_for('user.descargar_recibo', pago_id=pago.id)
+    } for pago in pagos]
+
+    return render_template('user/historial_pagos.html', pagos=pagos_historial)
+
+
+
+@user_blueprint.route('/descargar_recibo/<int:pago_id>')
+@login_required
+def descargar_recibo(pago_id):
+    # Buscar la transacción y verificar permisos como antes
+    transaccion = Transaccion.query.get_or_404(pago_id)
+    historial_vehiculo = HistorialVehiculo.query.get_or_404(transaccion.historial_vehiculo_id)
+    vehiculo = Vehiculo.query.get_or_404(historial_vehiculo.vehiculo_id)
+
+    if vehiculo.usuario_id != current_user.id:
+        abort(403)
+
+    # Crear un buffer de bytes para el PDF
+    buffer = BytesIO()
+
+    # Crear el archivo PDF en memoria
+    c = canvas.Canvas(buffer)
+    c.drawString(100,750,"Recibo de Pago")
+    c.drawString(100,735,f"ID de Transacción: {transaccion.id}")
+    c.drawString(100,720,f"Fecha de Pago: {transaccion.fecha_hora_pago.strftime('%d/%m/%Y %H:%M')}")
+    c.drawString(100,705,f"Monto: ${transaccion.monto}")
+    c.drawString(100,690,f"Método de Pago: {transaccion.metodo_pago}")
+    c.showPage()
+    c.save()
+
+    # Mover el puntero del buffer al principio para que 'send_file' lo lea desde el inicio
+    buffer.seek(0)
+
+    # Crear un nombre de archivo único
+    pdf_filename = f"recibo_{pago_id}.pdf"
+
+    # Enviar el buffer como un archivo PDF
+    return send_file(buffer, as_attachment=True, download_name=pdf_filename, mimetype='application/pdf')
